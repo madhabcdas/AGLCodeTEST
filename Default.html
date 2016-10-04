@@ -1,0 +1,52 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Test JSON</title>
+    <script type="text/javascript" src="Scripts/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="Scripts/lodash.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $.ajax({
+                url: 'http://agl-developer-test.azurewebsites.net/people.json',
+                type: 'GET',
+                crossDomain: true,
+                dataType: 'jsonp',
+                success: function (data) {
+                    console.log(data);
+                    var genderGrp = _.groupBy(data, 'gender');
+                    var parsedData = {};
+                    _.forOwn(genderGrp, function (value, key) {
+                        var cats = [];
+                        _.forEach(genderGrp[key], function (owner, key) {
+                            var foundCat = {};
+                            foundCats = _.filter(owner.pets, function (p) { return p.type = 'Cat'; });
+                            if (foundCats != undefined && foundCats.length > 0) {
+                                _.forEach(foundCats, function (foundCat, key) {
+                                    cats.push(foundCat.name);
+                                });
+                            }
+                        });
+                        parsedData[key] = _.sortBy(cats, [function (catName) { return catName; }]);
+                    });
+                    _.forOwn(parsedData, function (value, key) {
+                        $('#parsedData').append("<span id='" + key + "span' >" + key + "</span>");
+                        $('#' + key + 'span').append('<ul></ul>');
+                        _.forEach(value, function (foundCat, catKey) {
+                            $('#' + key + 'span').find('ul').append('<li>' + foundCat + '</li>');
+                        });
+                    });
+                },
+                error: function () { alert('Failed!'); }
+            });
+        });
+
+    </script>
+</head>
+
+<body>
+    <div id="parsedData">
+    </div>
+</body>
+
+</html>
